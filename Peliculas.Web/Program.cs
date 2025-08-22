@@ -4,8 +4,10 @@ using Peliculas.Core.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Data\peliculas.db");
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=peliculas.db"));
+    options.UseSqlite($"Data Source={Path.GetFullPath(dbPath)}"));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
