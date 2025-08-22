@@ -1,0 +1,31 @@
+﻿@model Peliculas.Core.Pelicula
+
+<h2>Crear Nueva Película</h2>
+
+<form asp-action="Create" method="post">
+	<div class="form-group">
+		<label asp-for="Titulo"></label>
+		<input asp-for="Titulo" class="form-control" />
+		<span asp-validation-for="Titulo" class="text-danger"></span>
+	</div>
+    <div class="form-group">
+        <label asp-for="Director"></label>
+        <input asp-for="Director" class="form-control" />
+        <span asp-validation-for="Director" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Anio"></label>
+        <input asp-for="Anio" class="form-control" />
+        <span asp-validation-for="Anio" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Puntuacion"></label>
+        <input asp-for="Puntuacion" class="form-control" />
+        <span asp-validation-for="Puntuacion" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Crear</button>
+</form>
+
+<p>
+    <a asp-action="Index">Volver al listado</a>
+</p>
