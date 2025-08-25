@@ -1,12 +1,14 @@
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Peliculas.Core;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 
 namespace Peliculas.WinForms
 {
-    public partial class Form1 : Form
+    public partial class Main : Form
     {
         readonly private List<Pelicula> peliculas = [];
-        public Form1()
+        public Main()
         {
             InitializeComponent();
             Load += SecuenciaInicio;
@@ -14,9 +16,19 @@ namespace Peliculas.WinForms
             dgvPeliculas.MultiSelect = false;
             dgvPeliculas.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvPeliculas.CellClick += DgvPeliculas_Seleccion;
+
+            for (int i = DateTime.Now.Year; i >= 1900; i--)
+            {
+                cb_Year.Items.Add(i.ToString());
+            }
+
+            for (double i = 10; i >= 0; i -= 0.1)
+            {
+                cb_Rating.Items.Add(i.ToString("0.0").Replace(',', '.'));
+            }
         }
 
-        private void SecuenciaInicio (object sender, EventArgs e)
+        private void SecuenciaInicio(object sender, EventArgs e)
         {
             CargarPeliculas();
         }
@@ -27,31 +39,66 @@ namespace Peliculas.WinForms
             dgvPeliculas.DataSource = db.Peliculas.ToList();
         }
 
+        private void Actualizar(object sender, EventArgs e)
+        {
+            CargarPeliculas();
+        }
+
         private void LimpiarInputs()
         {
-            tb_Titulo.Clear();
+            tb_Title.Clear();
             tb_Director.Clear();
-            cb_Anio.SelectedIndex = -1;
-            cb_Puntuacion.SelectedIndex = -1;
+            cb_Year.SelectedIndex = -1;
+            cb_Rating.SelectedIndex = -1;
         }
 
         private void Bt_Agregar(object sender, EventArgs e)
         {
             using var db = DbContextFactory.Create();
 
+            // Extract the data
+            string title = tb_Title.Text ?? string.Empty;               // Title
+            string director = tb_Director.Text ?? string.Empty;         // Director
+            object? selectedObject = cb_Year.SelectedItem;              // Year
+            string year = selectedObject?.ToString() ?? string.Empty;
+            selectedObject = cb_Rating.SelectedItem;                    // Rating
+            string rating = selectedObject?.ToString() ?? string.Empty;
+            rating = rating.Replace('.', ',');
+
+            int errorCode = 0;
+
+            if (string.IsNullOrEmpty(title))
+            {
+ 
+            }
+
+            int errorcode = (title == string.Empty)
+                ? (title.Length > 255)
+                    ? (director == string.Empty)
+                        ? (director.Length > 100)
+                            ? (year == string.Empty)
+                                ? (rating == string.Empty)
+                                    ? 0 : 1 : 2 : 3 : 4 : 5 : 6;
+
+            if (errorcode != 0)
+            {
+                MessageBox.Show($"{ErrorCode(errorcode)}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             try
             {
                 // Crea la película
-                var pelicula = new Pelicula
+                var movie = new Pelicula
                 {
-                    Titulo = tb_Titulo.Text,
-                    Director = tb_Director.Text,
-                    Anio = int.Parse(cb_Anio.SelectedItem.ToString()),
-                    Puntuacion = double.Parse(cb_Puntuacion.SelectedItem.ToString().Replace('.', ','))
+                    Titulo = title,
+                    Director = director,
+                    Anio = int.Parse(year),
+                    Puntuacion = double.Parse(rating)
                 };
 
                 // Agrega a la lista
-                db.Peliculas.Add(pelicula);
+                db.Peliculas.Add(movie);
                 db.SaveChanges();
 
                 // Refresca el DataGridView
@@ -79,10 +126,10 @@ namespace Peliculas.WinForms
 
             if (pelicula != null)
             {
-                pelicula.Titulo = tb_Titulo.Text;
+                pelicula.Titulo = tb_Title.Text;
                 pelicula.Director = tb_Director.Text;
-                pelicula.Anio = int.Parse(cb_Anio.SelectedItem.ToString());
-                pelicula.Puntuacion = double.Parse(cb_Puntuacion.SelectedItem.ToString().Replace('.', ','));
+                pelicula.Anio = int.Parse(cb_Year.SelectedItem.ToString());
+                pelicula.Puntuacion = double.Parse(cb_Rating.SelectedItem.ToString().Replace('.', ','));
 
                 db.SaveChanges();
                 CargarPeliculas();
@@ -117,6 +164,20 @@ namespace Peliculas.WinForms
 
         private int? peliculaSeleccionadaId = null;
 
+        private static string ErrorCode(int opcion)
+        {
+            Dictionary<int, string> errorCode = new(){
+                { 1, "El campo título no puede quedar vacío." },
+                { 2, "El campo título no puede contener mas de 255 caracteres."},
+                { 3, "El campo director no puede quedar vacío."},
+                { 4, "El campo director no puede contener mas de 100 caracteres."},
+                { 5, "Debe seleccionarse un año." },
+                { 6, "Debe seleccionarse una puntuación"},
+            };
+
+            return errorCode[opcion];
+        }
+
         private void DgvPeliculas_Seleccion(object? sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
@@ -124,12 +185,11 @@ namespace Peliculas.WinForms
                 var fila = dgvPeliculas.Rows[e.RowIndex];
                 peliculaSeleccionadaId = (int)fila.Cells["Id"].Value;
 
-                tb_Titulo.Text = fila.Cells["Titulo"].Value.ToString();
+                tb_Title.Text = fila.Cells["Titulo"].Value.ToString();
                 tb_Director.Text = fila.Cells["Director"].Value.ToString();
-                cb_Anio.SelectedItem = fila.Cells["Anio"].Value.ToString();
-                cb_Puntuacion.SelectedItem = fila.Cells["Puntuacion"].Value.ToString().Replace(',', '.');
+                cb_Year.SelectedItem = fila.Cells["Anio"].Value.ToString();
+                cb_Rating.SelectedItem = fila.Cells["Puntuacion"].Value.ToString().Replace(',', '.');
             }
         }
-
     }
 }

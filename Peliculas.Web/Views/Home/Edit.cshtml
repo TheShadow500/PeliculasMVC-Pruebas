@@ -1,10 +1,11 @@
 ﻿@model Peliculas.Core.Pelicula
 
-<h2>Insertar Nueva Película</h2>
+<h2>Editar Película</h2>
 
-<form asp-action="Create" method="post">
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-formaction="Id" />
 	<div class="form-group">
-		<label asp-for="Titulo">Título</label>
+		<label asp-for="Titulo"></label>
 		<input asp-for="Titulo" class="form-control" />
 		<span asp-validation-for="Titulo" class="text-danger"></span>
 	</div>
@@ -15,12 +16,6 @@
     </div>
     <div class="form-group">
         <label asp-for="Anio">Año</label>
-        <select asp-for="Anio" class="form-control">
-            @for (int i = 1900; i <= DateTime.Now.Year; i++)
-            {
-                <option value ="@i">@i</option>
-            }
-        </select>
         <input asp-for="Anio" class="form-control" />
         <span asp-validation-for="Anio" class="text-danger"></span>
     </div>
@@ -31,6 +26,6 @@
     </div>
     <div class="d-flex w-100 justify-content-between">
         <a asp-action="Index" class="btn btn-primary h-100 my-3">Volver al listado</a>
-        <button type="submit" class="btn btn-primary h-100 my-3">Insertar</button>
+        <button type="submit" class="btn btn-primary h-100 my-3">Guardar Cambios</button>
     </div>
 </form>
