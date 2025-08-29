@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Peliculas.Core;
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 
@@ -36,7 +37,9 @@ namespace Peliculas.WinForms
         private void CargarPeliculas()
         {
             using var db = DbContextFactory.Create();
-            dgvPeliculas.DataSource = db.Peliculas.ToList();
+            dgvPeliculas.DataSource = db.Peliculas
+                .OrderBy(p => p.Titulo)
+                .ToList();
         }
 
         private void Actualizar(object sender, EventArgs e)
@@ -57,34 +60,10 @@ namespace Peliculas.WinForms
             using var db = DbContextFactory.Create();
 
             // Extract the data
-            string title = tb_Title.Text ?? string.Empty;               // Title
-            string director = tb_Director.Text ?? string.Empty;         // Director
-            object? selectedObject = cb_Year.SelectedItem;              // Year
-            string year = selectedObject?.ToString() ?? string.Empty;
-            selectedObject = cb_Rating.SelectedItem;                    // Rating
-            string rating = selectedObject?.ToString() ?? string.Empty;
-            rating = rating.Replace('.', ',');
-
-            int errorCode = 0;
-
-            if (string.IsNullOrEmpty(title))
-            {
- 
-            }
-
-            int errorcode = (title == string.Empty)
-                ? (title.Length > 255)
-                    ? (director == string.Empty)
-                        ? (director.Length > 100)
-                            ? (year == string.Empty)
-                                ? (rating == string.Empty)
-                                    ? 0 : 1 : 2 : 3 : 4 : 5 : 6;
-
-            if (errorcode != 0)
-            {
-                MessageBox.Show($"{ErrorCode(errorcode)}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            string title = tb_Title.Text ?? string.Empty;                           // Title
+            string director = tb_Director.Text ?? string.Empty;                     // Director
+            string year = cb_Year.SelectedItem?.ToString() ?? string.Empty;         // Year
+            string rating = cb_Rating.SelectedItem?.ToString() ?? string.Empty;     // Rating
 
             try
             {
@@ -93,9 +72,22 @@ namespace Peliculas.WinForms
                 {
                     Titulo = title,
                     Director = director,
-                    Anio = int.Parse(year),
-                    Puntuacion = double.Parse(rating)
+                    Anio = int.TryParse(year, out var parsedYear) ? parsedYear : -1,
+                    Puntuacion = double.TryParse(rating.Replace('.', ','), out var parsedRating) ? parsedRating : -1,
                 };
+
+                var context = new ValidationContext(movie);
+                var results = new List<ValidationResult>();
+                if(!Validator.TryValidateObject(movie, context, results, true))
+                {
+                    string errores = string.Join("\n", results.Select(r => r.ErrorMessage));
+                    MessageBox.Show(errores, "Errores de validación", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // Parsea el año y el rating
+                movie.Anio = int.Parse(year);
+                movie.Puntuacion = double.Parse(rating.Replace('.', ','));
 
                 // Agrega a la lista
                 db.Peliculas.Add(movie);
@@ -163,20 +155,6 @@ namespace Peliculas.WinForms
         }
 
         private int? peliculaSeleccionadaId = null;
-
-        private static string ErrorCode(int opcion)
-        {
-            Dictionary<int, string> errorCode = new(){
-                { 1, "El campo título no puede quedar vacío." },
-                { 2, "El campo título no puede contener mas de 255 caracteres."},
-                { 3, "El campo director no puede quedar vacío."},
-                { 4, "El campo director no puede contener mas de 100 caracteres."},
-                { 5, "Debe seleccionarse un año." },
-                { 6, "Debe seleccionarse una puntuación"},
-            };
-
-            return errorCode[opcion];
-        }
 
         private void DgvPeliculas_Seleccion(object? sender, DataGridViewCellEventArgs e)
         {

@@ -16,17 +16,21 @@
     <div class="form-group">
         <label asp-for="Anio">Año</label>
         <select asp-for="Anio" class="form-control">
-            @for (int i = 1900; i <= DateTime.Now.Year; i++)
+            @for (int i = DateTime.Now.Year; i >= 1900; i--)
             {
                 <option value ="@i">@i</option>
             }
         </select>
-        <input asp-for="Anio" class="form-control" />
         <span asp-validation-for="Anio" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="Puntuacion">Puntuación</label>
-        <input asp-for="Puntuacion" class="form-control" />
+        <select asp-for="Puntuacion" class="form-control">
+            @for (double i = 10.0; i >= 0.0; i -= 0.1)
+            {
+                <option value="@i">@i.ToString("0.0").Replace(',', '.')</option>
+            }
+        </select>
         <span asp-validation-for="Puntuacion" class="text-danger"></span>
     </div>
     <div class="d-flex w-100 justify-content-between">

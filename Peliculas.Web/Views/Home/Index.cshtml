@@ -1,7 +1,13 @@
-﻿@model IEnumerable<Peliculas.Core.Pelicula>
+﻿@model X.PagedList.IPagedList<Peliculas.Core.Pelicula>
+@using X.PagedList.Mvc.Core
 
 @{
     ViewData["Title"] = "Peliculas - Home";
+}
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
 }
 
 <div class="text-center mb-4">
@@ -38,3 +44,11 @@
         }
     </tbody>
 </table>
+<div class="d-flex justify-content-center mt-3">
+    @Html.PagedListPager(Model, page => Url.Action("Index", new { page }), new PagedListRenderOptions
+    {
+        LiElementClasses = new[] { "page-item" },
+        PageClasses = new[] { "page-link" },
+        UlElementClasses = new[] { "pagination" }
+    })
+</div>

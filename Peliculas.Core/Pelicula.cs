@@ -4,6 +4,7 @@ namespace Peliculas.Core
 {
     public class Pelicula
     {
+
         public int Id { get; set; }                             // Clave primaria
 
         [Required(ErrorMessage = "El título es obligatorio")]
@@ -14,7 +15,7 @@ namespace Peliculas.Core
         [StringLength(100, ErrorMessage = "El director no puede tener mas de 100 caracteres")]
         public string Director { get; set; } = string.Empty;    // Ej: "Christopher Nolan"
 
-        [Range(1900, 2100, ErrorMessage = "El año debe estar comprendido entre 1900 y 2100")]
+        [Range(1900, 2025, ErrorMessage = "La puntuación debe estar entre 1900 y 2025")]
         public int Anio { get; set; }                           // Ej: 2010
 
         [Range(0, 10, ErrorMessage = "La puntuación debe estar entre 0 y 10")]

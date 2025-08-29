@@ -4,6 +4,7 @@ using Peliculas.Core;
 using Peliculas.Core.Data;
 using Peliculas.Web.Models;
 using System.Diagnostics;
+using X.PagedList.Extensions;
 
 namespace Peliculas.Web.Controllers
 {
@@ -12,9 +13,14 @@ namespace Peliculas.Web.Controllers
         private readonly AppDbContext _context = context;
         private readonly ILogger<HomeController> _logger = logger;
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? page)
         {
-            var peliculas = await _context.Peliculas.ToListAsync();
+            int pageSize = 10;
+            int pageNumber = page ?? 1;
+
+            var peliculas = _context.Peliculas
+                .OrderBy(p => p.Titulo)
+                .ToPagedList(pageNumber, pageSize);
             return View(peliculas);
         }
 
@@ -31,6 +37,7 @@ namespace Peliculas.Web.Controllers
             {
                 _context.Add(pelicula);
                 await _context.SaveChangesAsync();
+                TempData["Message"] = $"Se ha añadido la película '{pelicula.Titulo}' ";
                 return RedirectToAction(nameof(Index));
             }
             return View();
@@ -94,6 +101,8 @@ namespace Peliculas.Web.Controllers
             var pelicula = await _context.Peliculas.FindAsync(id);
             _context.Peliculas.Remove(pelicula);
             await _context.SaveChangesAsync();
+
+            TempData["Message"] = $"Película '{pelicula.Titulo}' eliminada correctamente.";
             return RedirectToAction(nameof(Index));
         }
 
